@@ -1,0 +1,55 @@
+# vim: ft=yaml
+#
+# Set values specific to:
+#   salt['config.get']('os_family') == RedHat.
+#
+# You just need to add the key:values for this `os_family` that differ
+# from `defaults.yaml` + `<osarch>.yaml`.
+#
+# If you do not need to provide defaults via the `os_family` config,
+# you can remove this file or provide at least an empty dict, e.g.
+# values: {}
+---
+values:
+  lookup:
+    pkg_manager: yum
+    config_defaults:
+      global:
+        log: 127.0.0.1 local2
+        chroot: /var/lib/haproxy
+        pidfile: /var/run/haproxy.pid
+        maxconn: 4000
+        user: haproxy
+        group: haproxy
+        daemon: ''
+        stats:
+          socket: /var/lib/haproxy/stats
+        ssl-default-bind-ciphers: PROFILE=SYSTEM
+        ssl-default-server-ciphers: PROFILE=SYSTEM
+      defaults:
+        mode: http
+        log: global
+        option:
+          httplog: ''
+          dontlognull: ''
+          http-server-close: ''
+          forwardfor: except 127.0.0.0/8
+          redispatch: ''
+        retries: 3
+        timeout:
+          http-request: 10s
+          queue: 1m
+          connect: 10s
+          client: 1m
+          server: 1m
+          http-keep-alive: 10s
+          check: 10s
+        maxconn: 3000
+  env:
+    CFGDIR: '{confdir}'
+    PIDFILE: '{pidfile}'
+  service:
+    # The SELinux policy prevents transition from
+    # system_u:system_r:init_t:s0 to system_u:object_r:haproxy_var_lib_t:s0
+    no_new_privileges: {{ not grains.get("selinux", {}).get("enabled") }}
+...

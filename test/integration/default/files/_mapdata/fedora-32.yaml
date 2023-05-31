@@ -1,0 +1,78 @@
+# yamllint disable rule:indentation rule:line-length
+# Fedora-32
+---
+values:
+  added_in_defaults: defaults_value
+  added_in_lookup: lookup_value
+  added_in_pillar: pillar_value
+  lookup:
+    arch: amd64
+    rootgroup: root
+    pkg:
+      name: haproxy
+    config: '/etc/haproxy/haproxy.cfg'
+    config_defaults: {}
+    config_dir: /etc/haproxy/conf.d
+    envfile: /etc/sysconfig/haproxy
+    service:
+      name: haproxy
+      override: /etc/systemd/system/haproxy.service.d
+    tls_dir: /etc/haproxy/tls
+  bind_virtual_ip: true
+  config:
+    global:
+      pidfile: /run/haproxy/haproxy.pid
+      stats:
+        socket /run/haproxy/haproxy.sock:
+          expose-fd: listeners
+          level: user
+          mode: '600'
+  env:
+    options: []
+  firewall:
+    manage: false
+    ports: []
+  selinux:
+    manage: true
+    ports: true
+  service:
+    cap_net_bind_service: false
+    harden: true
+    no_new_privileges: true
+    start_unprivileged: false
+  tls:
+    ca_certs: {}
+    cert_defaults:
+      ca_server: null
+      cn: null
+      days_remaining: 7
+      days_valid: 30
+      intermediate: []
+      root: ''
+      san: []
+      signing_cert: null
+      signing_policy: null
+      signing_private_key: null
+      signing_private_key_passphrase: null
+    certs: {}
+  map_jinja:
+    sources:
+    - Y:G@osarch
+    - Y:G@os_family
+    - Y:G@os
+    - Y:G@osfinger
+    - C@haproxy
+    - Y:G@id
+  master: template-master
+  tofs:
+    files_switch:
+    - any/path/can/be/used/here
+    - id
+    - roles
+    - osfinger
+    - os
+    - os_family
+    source_files:
+      haproxy-config-file-file-managed:
+      - example.tmpl.jinja
+  winner: pillar

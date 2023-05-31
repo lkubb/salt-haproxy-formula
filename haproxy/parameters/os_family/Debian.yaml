@@ -1,0 +1,60 @@
+# vim: ft=yaml
+#
+# Set values specific to:
+#   salt['config.get']('os_family') == Debian.
+#
+# You just need to add the key:values for this `os_family` that differ
+# from `defaults.yaml` + `<osarch>.yaml`.
+#
+# If you do not need to provide defaults via the `os_family` config,
+# you can remove this file or provide at least an empty dict, e.g.
+# values: {}
+# yamllint disable rule:line-length
+---
+values:
+  lookup:
+    pkg_manager: apt
+    config_defaults:
+      global:
+        log:
+          /dev/log:
+            - local0
+            - local1 notice
+        chroot: /var/lib/haproxy
+        stats:
+          socket /run/haproxy/admin.sock:
+            mode: 660
+            level: admin
+            expose-fd: listeners
+          timeout: 30s
+        user: haproxy
+        group: haproxy
+        daemon: ''
+        ca-base: /etc/ssl/certs
+        crt-base: /etc/ssl/private
+        ssl-default-bind-ciphers: ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+        ssl-default-bind-ciphersuites: TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256
+        ssl-default-bind-options: ssl-min-ver TLSv1.2 no-tls-tickets
+      defaults:
+        log: global
+        mode: http
+        option:
+          httplog: ''
+          dontlognull: ''
+        timeout:
+          connect: 5000
+          client: 50000
+          server: 50000
+        errorfile:
+          400: /etc/haproxy/errors/400.http
+          403: /etc/haproxy/errors/403.http
+          408: /etc/haproxy/errors/408.http
+          500: /etc/haproxy/errors/500.http
+          502: /etc/haproxy/errors/502.http
+          503: /etc/haproxy/errors/503.http
+          504: /etc/haproxy/errors/504.http
+  env:
+    options:
+      - "-f '{confdir}'"
+      - "-p '{pidfile}'"
+...

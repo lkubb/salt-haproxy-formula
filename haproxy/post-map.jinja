@@ -1,0 +1,10 @@
+{#- vim ft=jinja #}
+
+{#-
+      Merge default config values for distrib into config
+#}
+{%- do mapdata.config.update(salt["defaults.merge"](mapdata.lookup.config_defaults, mapdata.config, in_place=false)) %}
+
+{%- for cert_name, cert_config in mapdata.tls.certs.items() %}
+{%-   do mapdata.tls.certs[cert_name].update(salt["defaults.merge"](mapdata.tls.cert_defaults, cert_config, in_place=false)) %}
+{%- endfor %}

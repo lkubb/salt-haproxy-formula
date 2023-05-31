@@ -1,0 +1,38 @@
+{%- set rw = [] -%}
+
+[Service]
+
+# Directory creation and permissions
+####################################
+{% if haproxy.service.start_unprivileged -%}
+
+User={{ haproxy | traverse("config:global:user", "haproxy") }}
+Group={{ haproxy | traverse("config:global:group", "haproxy") }}
+{%- endif %}
+WorkingDirectory={{ haproxy | traverse("config:global:chroot", "/var/lib/haproxy") }}
+RuntimeDirectory=haproxy
+
+{%- if haproxy | traverse("config:global:chroot", "/var/lib/haproxy") == "/var/lib/haproxy" %}
+StateDirectory=haproxy
+{%- else %}
+{%-   do rw.append(haproxy.config.global.chroot) %}
+{%- endif %}
+{%- if rw %}
+ReadWritePaths={{ rw | join(" ") }}
+{%- endif %}
+
+# Hardening measures
+####################
+{% if haproxy.service.no_new_privileges -%}
+
+NoNewPrivileges=true
+{%- endif %}
+ProtectHome=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+SystemCallFilter=~@cpu-emulation @keyring @module @obsolete @raw-io @reboot @swap @sync
+{%- if haproxy.service.start_unprivileged and haproxy.service.cap_net_bind_service %}
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+{%- endif %}

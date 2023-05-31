@@ -1,0 +1,59 @@
+{%- macro render_opt(name, val, prefix=false) %}
+{%-   if val is mapping %}
+{%-     if not prefix %}
+{%-       for kk, vv in val | dictsort %}
+{{- render_opt(kk, vv, prefix=((prefix or []) + [name])) }}
+{%-       endfor %}
+{%-     else %}
+{%-       set data = [] %}
+{%-       for kk, vv in val.items() %}
+{%-         do data.extend([kk, vv]) %}
+{%-       endfor %}
+{{ ((prefix or []) + [name] + data) | select() | join(" ") }}
+{%-     endif %}
+{%-   elif val | is_list %}
+{%-     for vv in val %}
+{{ ((prefix or []) + [name, vv]) | select() | join(" ") }}
+{%-     endfor %}
+{%-   else %}
+{{ ((prefix or []) + [name, val]) | select() | join(" ") }}
+{%-   endif %}
+{%- endmacro -%}
+
+# This file is managed by Salt.
+# Manual changs might be overwritten.
+
+{%- set processed_scopes = [] %}
+
+{%- for scope in ["global", "defaults"] %}
+{%   if scope in haproxy.config %}
+{{ scope }}
+{%-     for name, val in haproxy.config[scope] | dictsort %}
+{{- render_opt(name, val) | indent(4, true) }}
+{%-     endfor %}
+{%-   endif %}
+{%-   do processed_scopes.append(scope) %}
+{%- endfor %}
+
+{%- for scope in ["backend", "frontend", "listen"] %}
+{%-   if scope not in haproxy.config %}
+{%-     continue %}
+{%-   endif %}
+{%    for scopename in haproxy.config[scope] %}
+{{ scope }} {{ scopename }}
+{%-     for name, val in haproxy.config[scope][scopename] | dictsort %}
+{{- render_opt(name, val) | indent(4, true) }}
+{%-     endfor %}
+{%-   endfor %}
+{%-   do processed_scopes.append(scope) %}
+{%- endfor %}
+
+{%- for scope in haproxy.config %}
+{%-   if scope in processed_scopes %}
+{%-     continue %}
+{%-   endif %}
+{{ scope }}
+{%-   for name, val in haproxy.config[scope] | dictsort %}
+{{- render_opt(name, val) | indent(4, true) }}
+{%-   endfor %}
+{%- endfor %}
