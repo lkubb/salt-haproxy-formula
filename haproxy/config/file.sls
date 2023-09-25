@@ -74,7 +74,7 @@ CA cert for {{ ca_name }} is managed:
   file.managed:
     - name: {{ haproxy.lookup.tls_dir | path_join("ca", ca_name) }}.pem
     - contents: {{ ((ca_cert | join("\n")) if ca_cert | is_list else ca_cert) | json }}
-    - makedirs: True
+    - makedirs: true
     - require:
       - sls: {{ sls_package_install }}
 {%- endfor %}

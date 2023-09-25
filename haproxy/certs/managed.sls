@@ -30,7 +30,7 @@ HAProxy {{ name }} private key is managed:
     - prereq:
       - HAProxy {{ name }} certificate is managed
 {%-   endif %}
-    - makedirs: True
+    - makedirs: true
     - user: {{ user }}
     - group: {{ group }}
     - require:
@@ -58,7 +58,7 @@ HAProxy {{ name }} certificate is managed:
     - mode: '0640'
     - user: {{ user }}
     - group: {{ group }}
-    - makedirs: True
+    - makedirs: true
     - append_certs: {{ config.intermediate | json }}
     - days_remaining: {{ config.days_remaining }}
     - days_valid: {{ config.days_valid }}
